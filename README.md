@@ -27,6 +27,19 @@ Government budget ──► Operator mints entitlement ──► Farmer wallet (
 | Shared | `packages/shared/` | DTOs, categories, invoice canonicalisation + SHA-256, EMVCo-style QR codec, design tokens |
 | Research | `docs/RESEARCH-BRIEF.md` | Global precedents, Indonesian regulation, architecture rationale, naming |
 
+## Live demo
+
+Hosted on a single DigitalOcean VM (Singapore) with the full stack: 4 Besu validators, operator, Postgres and the three apps behind TLS.
+
+| App | URL |
+|---|---|
+| Tandur wallet | https://tandur.178-128-81-205.sslip.io |
+| Tandur Kasir (POS) | https://kasir.178-128-81-205.sslip.io |
+| Lumbung dashboard | https://lumbung.178-128-81-205.sslip.io |
+| Operator API | https://api-tandur.178-128-81-205.sslip.io/health |
+
+Same demo logins as below. Some corporate web filters block `sslip.io` hostnames; if a page will not load on an office network, try mobile data. Deployment runbook: `deploy/README.md`.
+
 ## Run it
 
 Prerequisites: Node 20+, Docker Desktop.
