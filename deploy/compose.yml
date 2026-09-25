@@ -1,0 +1,166 @@
+# Hosted Tandur stack: 4 Besu QBFT validators (no RPC exposed to the internet), Postgres, operator API,
+# static web. TLS + public hostnames are handled by the host's edge Caddy on the shared `tandur_net` network.
+# Usage (from repo root on the server):
+#   bash chain/setup.sh                                   # generates genesis + validator keys once
+#   docker compose -f deploy/compose.yml up -d validator1 validator2 validator3 validator4 postgres
+#   docker compose -f deploy/compose.yml --profile tools run --rm deployer
+#   docker compose -f deploy/compose.yml up -d operator web
+#   docker compose -f deploy/compose.yml --profile tools run --rm seed
+name: tandur
+networks:
+  tandur_net:
+    name: tandur_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.0.0/24
+volumes:
+  pg: {}
+  node1: {}
+  node2: {}
+  node3: {}
+  node4: {}
+  deployments: {}
+  storage: {}
+
+x-besu: &besu
+  image: hyperledger/besu:latest
+  restart: unless-stopped
+  user: "0"
+  environment:
+    BESU_LOGGING: WARN
+    BESU_OPTS: "-Xmx256m -XX:+UseSerialGC"
+  mem_limit: 900m
+  volumes:
+    - ../chain/networkFiles/genesis.json:/config/genesis.json:ro
+
+x-besu-cmd: &besu-cmd >
+  --data-path=/data
+  --genesis-file=/config/genesis.json
+  --node-private-key-file=/config/key
+  --profile=ENTERPRISE
+  --min-gas-price=0
+  --p2p-port=30303
+  --bootnodes=enode://${BOOTNODE_PUB}@172.29.0.11:30303
+  --rpc-http-enabled --rpc-http-host=0.0.0.0 --rpc-http-port=8545
+  --rpc-http-api=ETH,NET,WEB3,QBFT
+  --rpc-http-cors-origins=*
+  --host-allowlist=*
+  --discovery-enabled=true
+
+services:
+  validator1:
+    <<: *besu
+    container_name: tandur-validator-ministry
+    volumes:
+      - ../chain/networkFiles/genesis.json:/config/genesis.json:ro
+      - ../chain/node1/key:/config/key:ro
+      - node1:/data
+    command: *besu-cmd
+    networks:
+      tandur_net:
+        ipv4_address: 172.29.0.11
+  validator2:
+    <<: *besu
+    container_name: tandur-validator-operator
+    volumes:
+      - ../chain/networkFiles/genesis.json:/config/genesis.json:ro
+      - ../chain/node2/key:/config/key:ro
+      - node2:/data
+    command: *besu-cmd
+    networks:
+      tandur_net:
+        ipv4_address: 172.29.0.12
+  validator3:
+    <<: *besu
+    container_name: tandur-validator-auditor
+    volumes:
+      - ../chain/networkFiles/genesis.json:/config/genesis.json:ro
+      - ../chain/node3/key:/config/key:ro
+      - node3:/data
+    command: *besu-cmd
+    networks:
+      tandur_net:
+        ipv4_address: 172.29.0.13
+  validator4:
+    <<: *besu
+    container_name: tandur-validator-bank
+    volumes:
+      - ../chain/networkFiles/genesis.json:/config/genesis.json:ro
+      - ../chain/node4/key:/config/key:ro
+      - node4:/data
+    command: *besu-cmd
+    networks:
+      tandur_net:
+        ipv4_address: 172.29.0.14
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: tandur-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tandur
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: tandur
+    volumes:
+      - pg:/var/lib/postgresql/data
+    networks: [tandur_net]
+
+  operator:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.operator
+    image: tandur-operator
+    container_name: tandur-operator
+    restart: unless-stopped
+    environment: &operator-env
+      RPC_URL: http://validator2:8545
+      CHAIN_ID: "6221"
+      OPERATOR_KEY: ${OPERATOR_KEY}
+      DATABASE_URL: postgres://tandur:${PG_PASSWORD}@postgres:5432/tandur
+      JWT_SECRET: ${JWT_SECRET}
+      VAULT_SECRET: ${VAULT_SECRET}
+      OPERATOR_PORT: "4600"
+      STORAGE_DIR: ./storage
+    volumes:
+      - deployments:/app/contracts/deployments
+      - storage:/app/operator/storage
+    depends_on: [postgres, validator2]
+    networks: [tandur_net]
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        VITE_API_URL: https://${API_HOST}
+    image: tandur-web
+    container_name: tandur-web
+    restart: unless-stopped
+    environment:
+      WALLET_HOST: ${WALLET_HOST}
+      POS_HOST: ${POS_HOST}
+      LUMBUNG_HOST: ${LUMBUNG_HOST}
+    networks: [tandur_net]
+
+  # one-off tools
+  deployer:
+    image: tandur-operator
+    profiles: [tools]
+    working_dir: /app/contracts
+    environment:
+      RPC_URL: http://validator2:8545
+      OPERATOR_KEY: ${OPERATOR_KEY}
+    volumes:
+      - deployments:/app/contracts/deployments
+    command: ["npx", "hardhat", "run", "scripts/deploy.ts", "--network", "besu"]
+    networks: [tandur_net]
+  seed:
+    image: tandur-operator
+    profiles: [tools]
+    environment: *operator-env
+    volumes:
+      - deployments:/app/contracts/deployments
+      - storage:/app/operator/storage
+    command: ["npx", "tsx", "src/seed.ts"]
+    networks: [tandur_net]

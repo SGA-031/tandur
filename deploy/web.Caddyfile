@@ -1,0 +1,25 @@
+# Internal static server. The edge Caddy terminates TLS and proxies by hostname to :80 here.
+:80 {
+	encode zstd gzip
+	@wallet host {$WALLET_HOST}
+	handle @wallet {
+		root * /srv/wallet
+		try_files {path} /index.html
+		file_server
+	}
+	@pos host {$POS_HOST}
+	handle @pos {
+		root * /srv/pos
+		try_files {path} /index.html
+		file_server
+	}
+	@lumbung host {$LUMBUNG_HOST}
+	handle @lumbung {
+		root * /srv/lumbung
+		try_files {path} /index.html
+		file_server
+	}
+	handle {
+		respond "Tandur: unknown host" 404
+	}
+}

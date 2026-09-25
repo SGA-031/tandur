@@ -1,0 +1,12 @@
+# Append to the host's edge Caddyfile (the Caddy container must be attached to the external network `tandur_net`).
+tandur.178-128-81-205.sslip.io, kasir.178-128-81-205.sslip.io, lumbung.178-128-81-205.sslip.io {
+	encode zstd gzip
+	reverse_proxy tandur-web:80
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+	}
+}
+api-tandur.178-128-81-205.sslip.io {
+	reverse_proxy tandur-operator:4600
+}

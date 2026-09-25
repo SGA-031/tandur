@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+**/dist
+.env
+.logs
+chain/networkFiles
+chain/node*
+chain/data
+contracts/artifacts
+contracts/cache
+contracts/deployments
+operator/storage
+.git
