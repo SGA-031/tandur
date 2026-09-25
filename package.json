@@ -1,0 +1,27 @@
+{
+  "name": "tandur",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tandur farmer subsidy wallet + Lumbung central dashboard on a permissioned Besu ledger",
+  "workspaces": [
+    "packages/shared",
+    "contracts",
+    "operator",
+    "apps/wallet",
+    "apps/pos",
+    "apps/lumbung"
+  ],
+  "scripts": {
+    "chain:up": "bash chain/setup.sh && docker compose -f chain/docker-compose.yml up -d",
+    "chain:down": "docker compose -f chain/docker-compose.yml down -v",
+    "contracts:deploy": "npm -w contracts run deploy",
+    "contracts:test": "npm -w contracts test",
+    "operator:dev": "npm -w operator run dev",
+    "operator:seed": "npm -w operator run seed",
+    "wallet:dev": "npm -w apps/wallet run dev",
+    "pos:dev": "npm -w apps/pos run dev",
+    "lumbung:dev": "npm -w apps/lumbung run dev",
+    "dev": "bash scripts/dev-all.sh",
+    "reset": "npm run chain:down && npm run chain:up && sleep 20 && npm run contracts:deploy && npm run operator:seed"
+  }
+}

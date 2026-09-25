@@ -1,0 +1,16 @@
+!operator/storage/.gitkeep
+.DS_Store
+.env
+.logs
+*.log
+apps/*/dev-dist
+chain/data
+chain/networkFiles
+chain/node[0-9]*/
+contracts/artifacts
+contracts/cache
+contracts/deployments/
+contracts/typechain-types
+dist
+node_modules
+operator/storage/*

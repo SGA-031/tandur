@@ -1,0 +1,33 @@
+/* Tandur / Lumbung shared design tokens. Import once per app: `@tandur/shared/theme.css` */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* brand */
+  --sawah-900: #12301F; --sawah-800: #1F4D33; --sawah-700: #2A6642; --sawah-600: #2F7D4B; --sawah-500: #3E9A5F; --sawah-300: #9BD1AC; --sawah-100: #DDF0E2; --sawah-50: #EEF7F0;
+  --padi-600: #C48A12; --padi-500: #E0A526; --padi-300: #F2D48A; --padi-100: #FBF0D2;
+  --tanah-800: #3D2E22; --tanah-600: #5B4636; --tanah-300: #B9A48E; --tanah-100: #EADFD1;
+  /* neutrals */
+  --paper: #F7F3EA; --surface: #FFFFFF; --surface-2: #F1ECE1; --line: #E3DCCF; --line-strong: #CFC6B5;
+  --ink: #1E1B16; --ink-2: #4A453C; --ink-3: #7A7365; --ink-4: #A8A193;
+  /* status */
+  --ok: #2F7D4B; --ok-bg: #E3F3E7; --warn: #B9770E; --warn-bg: #FBF0D2; --serious: #C2410C; --serious-bg: #FDE7D9; --critical: #B42318; --critical-bg: #FDE2E0; --info: #1D5FA8; --info-bg: #E1ECF9;
+  /* type */
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* radii, shadow */
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --shadow-1: 0 1px 2px rgba(30,27,22,.06), 0 1px 1px rgba(30,27,22,.04);
+  --shadow-2: 0 4px 14px rgba(30,27,22,.08), 0 1px 3px rgba(30,27,22,.06);
+  --touch: 56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--paper); line-height: 1.45; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--sawah-700); }
+code, .mono { font-family: var(--mono); font-size: 0.9em; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--padi-500); outline-offset: 2px; }
